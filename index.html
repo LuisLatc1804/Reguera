@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario Web</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div id="setup" class="setup-section active">
+            <h1>📦 Registro de Inventario</h1>
+            <p>Identifique a los responsables de la actividad:</p>
+            <input type="text" id="responsables" placeholder="Nombres de los responsables...">
+            <button class="btn" onclick="startInventory()">Empezar Actividad</button>
+            
+            <button onclick="openHistoryModal()" style="width:100%; margin-top: 10px; padding: 10px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor:pointer;">
+                📜 Ver Inventarios Anteriores
+            </button>
+        </div>
+
+        <div id="inventory" class="inventory-section">
+            <div class="top-nav">
+                <button class="nav-btn btn-new" onclick="resetCurrentInventory()">
+                    <span>➕</span> Nuevo
+                </button>
+                <button class="nav-btn btn-add" onclick="addNewProductPrompt()">
+                    <span>➕</span> Agregar
+                </button>
+                <button class="nav-btn btn-history" onclick="openHistoryModal()">
+                    <span>📋</span> Historial
+                </button>
+            </div>
+
+            <div id="display-responsables" class="resp-banner"></div>
+            
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Escribe para buscar 🔍..." onkeyup="filterProducts()">
+            </div>
+
+            <div id="results"></div> 
+
+            <hr> 
+            
+            <h3>📋 Productos Agregados</h3>
+            <div id="selected-list"></div>
+
+            <button class="btn btn-export" onclick="exportToExcel()" style="margin-top: 20px; background: #27ae60;">
+                💾 Finalizar, Guardar y Descargar Excel
+            </button>
+        </div>
+    </div>
+
+    <div id="calc-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="calc-product-name" style="margin-top:0; color:#2c3e50;">Producto</h3>
+            
+            <div id="weight-calc-info" style="display:none; background: #fff3e0; padding: 5px; border-radius: 5px; margin-bottom: 5px; font-size: 0.8rem; color: #e65100; text-align: center; border: 1px solid #ffcc80;">
+                Modo Pesaje Automático Activado
+            </div>
+
+            <div id="calc-history" style="font-size: 0.9rem; color: #2980b9; height: 20px; margin-bottom: 5px; font-weight: bold;"></div>
+            <div id="calc-display" class="calc-display">0</div>
+            
+            <div class="calculator-grid">
+                <button onclick="pressKey('7')">7</button><button onclick="pressKey('8')">8</button><button onclick="pressKey('9')">9</button>
+                <button onclick="pressKey('4')">4</button><button onclick="pressKey('5')">5</button><button onclick="pressKey('6')">6</button>
+                <button onclick="pressKey('1')">1</button><button onclick="pressKey('2')">2</button><button onclick="pressKey('3')">3</button>
+                <button onclick="pressKey('.')">.</button><button onclick="pressKey('0')">0</button>
+                <button onclick="clearCalc()" style="background:#e74c3c; color:white;">C</button>
+            </div>
+            
+            <button onclick="addToHistory()" style="width: 100%; margin-top: 15px; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">
+                ➕ SUMAR CANTIDAD
+            </button>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="closeCalc()" style="flex:1; padding: 12px; background:#bdc3c7; border:none; border-radius:10px; font-weight:bold;">Cerrar</button>
+                <button onclick="saveCalc()" style="flex:2; padding: 12px; background:#27ae60; color:white; border:none; border-radius:10px; font-weight:bold; font-size: 1.1rem;">
+                    ✅ GUARDAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px; max-height: 80vh; overflow-y: auto;">
+            <h3 style="margin-top:0;">Inventarios Guardados</h3>
+            <div id="history-list"></div>
+            <button onclick="closeHistoryModal()" style="width: 100%; margin-top: 15px; padding: 10px; background: #bdc3c7; border: none; border-radius: 8px; cursor:pointer;">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

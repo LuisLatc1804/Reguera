@@ -1,0 +1,262 @@
+/* =========================================
+   1. VARIABLES Y CONFIGURACIÓN BASE
+   ========================================= */
+:root {
+    --primary: #2c3e50;
+    --secondary: #27ae60;
+    --accent: #2980b9;
+    --light: #f4f7f6;
+    --weight-color: #e65100;
+    --danger: #e74c3c;
+    --warning: #f1c40f;
+    --dark-bg: #2f3542;
+    --success-text: #2ecc71;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--light);
+    margin: 0;
+    padding: 10px;
+    color: #333;
+    /* Previene el zoom al enfocar inputs en iOS */
+    touch-action: manipulation;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+h1 { text-align: center; color: var(--primary); margin-bottom: 20px; }
+h3 { color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; }
+
+/* =========================================
+   2. SECCIONES Y FORMULARIOS
+   ========================================= */
+.setup-section, .inventory-section { display: none; }
+.active { display: block; }
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.3s;
+}
+
+.btn:active { transform: scale(0.98); }
+
+.btn-history-main {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    background: #9b59b6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* =========================================
+   3. BARRA DE NAVEGACIÓN (TOP NAV)
+   ========================================= */
+.top-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    background: var(--primary);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 8px 5px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.nav-btn span { font-size: 1.2rem; margin-bottom: 4px; }
+
+.btn-new { border-bottom: 3px solid var(--danger); }
+.btn-add { border-bottom: 3px solid var(--warning); }
+.btn-history { border-bottom: 3px solid var(--accent); }
+
+/* =========================================
+   4. BUSCADOR Y LISTAS
+   ========================================= */
+.search-box { background: white; padding-bottom: 10px; }
+
+.resp-banner {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--primary);
+    background: #e1f5fe;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.product-card {
+    border-bottom: 1px solid #eee;
+    padding: 15px 10px;
+    cursor: pointer;
+}
+
+.product-card:active { background: #f0f0f0; }
+
+.selected-item {
+    background: white;
+    margin-bottom: 8px;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #f0f0f0;
+}
+
+.delete-item-btn {
+    background: #fff5f5;
+    border: 1px solid #feb2b2;
+    color: var(--danger);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* =========================================
+   5. CALCULADORA Y MODALES
+   ========================================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: white;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    width: 90%;
+    max-width: 350px;
+    border-radius: 20px;
+}
+
+.calc-display {
+    background: var(--dark-bg);
+    color: var(--success-text);
+    padding: 15px;
+    text-align: right;
+    font-size: 2.2rem;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+#calc-history {
+    font-size: 0.9rem;
+    color: var(--accent);
+    min-height: 20px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    word-break: break-all;
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.calculator-grid button {
+    padding: 20px;
+    font-size: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+}
+
+.calculator-grid button:active { background: #eee; }
+
+#weight-calc-info {
+    background: #fff3e0;
+    color: var(--weight-color);
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    text-align: center;
+    border: 1px solid #ffe0b2;
+}
+
+.btn-add-sum {
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-cancel { background: #bdc3c7; flex: 1; border: none; padding: 12px; border-radius: 10px; font-weight: bold; }
+.btn-save { background: var(--secondary); flex: 2; border: none; color: white; padding: 12px; border-radius: 10px; font-weight: bold; }
+
+/* Especiales */
+.btn-danger-text { color: var(--danger) !important; font-weight: bold; }
+.btn-export { background: var(--secondary); margin-top: 20px; }
