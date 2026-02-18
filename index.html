@@ -23,9 +23,10 @@
 
         <div id="inventory" class="inventory-section">
             <div class="top-nav">
-                <button class="nav-btn btn-new" onclick="resetCurrentInventory()">
-                    <span>➕</span> Nuevo
-                </button>
+               <button class="nav-btn btn-new" onclick="resetInventory()">
+        <span>♻️</span>
+        Nuevo
+    </button>
                 <button class="nav-btn btn-add" onclick="addNewProductPrompt()">
                     <span>➕</span> Agregar
                 </button>
@@ -85,13 +86,22 @@
         </div>
     </div>
 
-    <div id="history-modal" class="modal">
-        <div class="modal-content" style="max-width: 400px; max-height: 80vh; overflow-y: auto;">
-            <h3 style="margin-top:0;">Inventarios Guardados</h3>
-            <div id="history-list"></div>
-            <button onclick="closeHistoryModal()" style="width: 100%; margin-top: 15px; padding: 10px; background: #bdc3c7; border: none; border-radius: 8px; cursor:pointer;">Cerrar</button>
-        </div>
+   <div id="history-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Historial de Inventarios</h3>
+        <div id="history-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;">
+            </div>
+        <button class="btn-cancel" onclick="closeHistoryModal()" style="width:100%">Cerrar</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+    <button onclick="descargarRespaldoCompleto()" style="background-color: #34495e; color: white; padding: 10px; border-radius: 5px; border: none;">
+        💾 Descargar Respaldo (.json)
+    </button>
+    <button onclick="exportarTodoAExcel()" style="background-color: #27ae60; color: white; padding: 10px; border-radius: 5px; border: none;">
+        📊 Excel de Todo el Historial
+    </button>
+</div>
     </div>
+</div>
 
     <script src="script.js"></script>
 </body>
