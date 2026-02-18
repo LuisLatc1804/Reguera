@@ -104,7 +104,6 @@ const rawProducts = [
     "SHAMPU SAVITAL", "SEMILLAS NUTRITIVAS", "SOPA SOBRE MAGGY",
     "SOPA SOBRE IBERIA", "SUAVISANTE DOWNY 700 ML", "SUAVISANTE TULIPAN 1 LT",
     "SUAVISANTE TULIPAN 1/2 LT", "SUAVITEL SOBRE", "SUAVIZANTE SUPER+ SOBRE",
-    "SUAVISANTE DOWNY 700 ML", "SUAVISANTE TULIPAN 1 LT", "SUAVISANTE TULIPAN 1/2 LT",
     "SUERO GUARALACT 800 ML", "SUERO KASERO KO 850 ML", "SUERO LAS LAJITAS",
     "SUERO VEGA", "Suero vega picante", "TALLARIN CAPRI",
     "TALLARIN ESPECIAL", "TAMARINDO 400 GRS TODOS", "TOALLAS HUMEDAS",
@@ -313,13 +312,15 @@ function addNewProductPrompt() {
 // 8. EXPORTACIÓN Y PERSISTENCIA
 function exportToExcel() {
     const items = inventoryData.filter(p => p.qty > 0);
-    if(items.length === 0) return alert("No hay datos para exportar");
+    if(items.length === 0) return alert("No hay nada que exportar.");
+
+    // GUARDAR EN HISTORIAL AUTOMÁTICAMENTE
+    saveToLocalStorage();
 
     const data = items.map(p => ({
         "PRODUCTO": p.name,
         "CANTIDAD": p.qty,
-        "DETALLE": p.history.join(" + "),
-        "FECHA": new Date().toLocaleString()
+        "DESGLOSE": p.history.join(" + ")
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -327,19 +328,7 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(wb, ws, "Inventario");
     XLSX.writeFile(wb, `Inventario_${new Date().getTime()}.xlsx`);
     
-    saveToLocalStorage();
-}
-
-function saveToLocalStorage() {
-    const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
-    const newEntry = {
-        id: Date.now(),
-        date: new Date().toLocaleString(),
-        staff: document.getElementById('display-responsables').innerText,
-        data: inventoryData.filter(p => p.qty > 0)
-    };
-    history.push(newEntry);
-    localStorage.setItem('inventoryHistory', JSON.stringify(history));
+    alert("Excel generado y guardado en Historial.");
 }
 
 function resetCurrentInventory() {
@@ -348,5 +337,101 @@ function resetCurrentInventory() {
     }
 }
 
-// INICIAR
+// --- SISTEMA DE HISTORIAL CON VISUALIZACIÓN ---
+
+function saveToLocalStorage() {
+    const resp = document.getElementById('responsables').value.trim() || "Sin nombre";
+    const countedItems = inventoryData.filter(p => p.qty > 0);
+    
+    if (countedItems.length === 0) return;
+
+    const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
+    const newEntry = {
+        id: Date.now(),
+        date: new Date().toLocaleString(),
+        staff: resp,
+        data: countedItems.map(p => ({
+            name: p.name,
+            qty: p.qty,
+            history: [...p.history]
+        }))
+    };
+
+    history.push(newEntry);
+    localStorage.setItem('inventoryHistory', JSON.stringify(history));
+}
+
+function openHistoryModal() {
+    const modal = document.getElementById('history-modal');
+    const listContainer = document.getElementById('history-list');
+    const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
+
+    listContainer.innerHTML = "";
+
+    if (history.length === 0) {
+        listContainer.innerHTML = "<p style='text-align:center; color:#888;'>No hay registros guardados.</p>";
+    } else {
+        [...history].reverse().forEach(inv => {
+            const div = document.createElement('div');
+            div.style = "display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border:1px solid #ddd; padding:10px; border-radius:8px; cursor:pointer; background:#fff;";
+            
+            div.innerHTML = `
+                <div onclick="loadInventory(${inv.id})" style="flex-grow:1">
+                    <strong style="display:block">${inv.date}</strong>
+                    <small>${inv.staff} (${inv.data.length} productos)</small>
+                </div>
+                <button onclick="deleteFromHistory(${inv.id})" style="background:none; border:none; color:red; font-size:1.2rem; margin-left:10px; cursor:pointer;">🗑️</button>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+    modal.style.display = "block";
+}
+
+function loadInventory(id) {
+    const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
+    const selected = history.find(inv => inv.id === id);
+    
+    if (!selected) return;
+
+    if (confirm(`¿Deseas cargar el inventario de "${selected.staff}"? Se perderá el conteo actual de la pantalla.`)) {
+        // Resetear base
+        inventoryData.forEach(p => { p.qty = 0; p.history = []; });
+
+        // Cargar datos
+        selected.data.forEach(savedItem => {
+            let prod = inventoryData.find(p => p.name === savedItem.name);
+            if (!prod) {
+                prod = { name: savedItem.name, qty: 0, history: [], unitWeight: 1, isWeight: false };
+                inventoryData.push(prod);
+            }
+            prod.qty = savedItem.qty;
+            prod.history = [...savedItem.history];
+        });
+
+        document.getElementById('display-responsables').innerText = "Viendo Historial: " + selected.staff;
+        document.getElementById('setup').classList.remove('active');
+        document.getElementById('inventory').classList.add('active');
+        
+        closeHistoryModal();
+        renderSelectedList();
+        alert("Inventario cargado correctamente.");
+    }
+}
+
+function deleteFromHistory(id) {
+    if (confirm("¿Borrar definitivamente este registro?")) {
+        let history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
+        history = history.filter(inv => inv.id !== id);
+        localStorage.setItem('inventoryHistory', JSON.stringify(history));
+        openHistoryModal();
+    }
+}
+
+function closeHistoryModal() {
+    document.getElementById('history-modal').style.display = "none";
+}
+
+// INICIAR AL CARGAR EL SCRIPT
 initInventory();
+
