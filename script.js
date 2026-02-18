@@ -1,5 +1,5 @@
 /**
- * SISTEMA DE INVENTARIO - LÓGICA CORE (script.js)
+ * SISTEMA DE INVENTARIO - VERSIÓN FINAL CORREGIDA
  */
 
 // 1. BASE DE DATOS DE PRODUCTOS
@@ -116,22 +116,29 @@ const rawProducts = [
 // 2. ESTADO GLOBAL
 let inventoryData = [];
 let currentProduct = null;
-let currentDisplay = "";
+let currentDisplay = ""; 
 
 // 3. INICIALIZACIÓN
 function initInventory() {
     inventoryData = rawProducts.map(name => {
-        let uWeight = 1; 
+        let uWeight = 1;
         const upper = name.toUpperCase();
         
-        if(upper.includes("900 GR") || upper.includes("900 GRS") || upper.includes("900 ML")) uWeight = 0.9;
-        else if(upper.includes("1/2") || upper.includes("500 GRS") || upper.includes("500 GMS") || upper.includes("500 ML") || upper.includes("500 GR")) uWeight = 0.5;
-        else if(upper.includes("250 GRS") || upper.includes("250 GMS") || upper.includes("250 ML")) uWeight = 0.25;
-        else if(upper.includes("200 GMS") || upper.includes("200 GRS") || upper.includes("200 ML") || upper.includes("200 GR")) uWeight = 0.2;
-        else if(upper.includes("1 KG") || upper.includes("1 KILO") || upper.includes("1 LIT") || upper.includes("1 LTS") || upper.includes("1LT")) uWeight = 1.0;
-        else if(upper.includes("1,5 LTRS")) uWeight = 1.5;
-        else if(upper.includes("400 GRS") || upper.includes("400 GMS") || upper.includes("400 GR")) uWeight = 0.4;
-        else if(upper.includes("185GRS") || upper.includes("186 GRS")) uWeight = 0.185;
+        // Detección mejorada de peso
+        if (upper.includes("GRS") || upper.includes("GR")) {
+            if (upper.includes("900")) uWeight = 0.9;
+            else if (upper.includes("500")) uWeight = 0.5;
+            else if (upper.includes("450")) uWeight = 0.45;
+            else if (upper.includes("400")) uWeight = 0.4;
+            else if (upper.includes("375")) uWeight = 0.375;
+            else if (upper.includes("300")) uWeight = 0.3;
+            else if (upper.includes("250")) uWeight = 0.25;
+            else if (upper.includes("200")) uWeight = 0.2;
+            else if (upper.includes("185") || upper.includes("186")) uWeight = 0.185;
+            else if (upper.includes("100")) uWeight = 0.1;
+            else if (upper.includes("54")) uWeight = 0.054;
+            else if (upper.includes("1 KG") || upper.includes("1KG")) uWeight = 1.0;
+        } 
 
         return {
             name: name,
@@ -181,25 +188,34 @@ function filterProducts() {
     });
 }
 
-// 6. CALCULADORA
-function openCalc(prod) {
-    currentProduct = prod;
+// 6. LÓGICA DE LA CALCULADORA
+function openCalc(product) {
+    currentProduct = product;
     currentDisplay = ""; 
+
+    document.getElementById('calc-product-name').innerText = product.name;
     
-    const infoW = document.getElementById('weight-calc-info');
-    if(infoW) {
-        infoW.style.display = prod.isWeight ? 'block' : 'none';
-        infoW.innerHTML = prod.isWeight ? `⚠️ Modo Pesaje: Convirtiendo ${prod.unitWeight} kg a 1 unidad` : '';
+    if (product.qty > 0) {
+        document.getElementById('calc-history').innerText = `Actualmente guardado: ${product.qty}`;
+    } else {
+        document.getElementById('calc-history').innerText = "Sin contar todavía";
     }
 
-    document.getElementById('calc-product-name').innerText = prod.name;
-    document.getElementById('calc-modal').style.display = "block";
+    const infoBox = document.getElementById('weight-calc-info');
+    if (product.isWeight) {
+        infoBox.innerText = `⚖️ Modo Peso: Ingresa el peso TOTAL en KG. El sistema dividirá entre ${product.unitWeight} para darte las unidades.`;
+        infoBox.style.display = 'block';
+    } else {
+        infoBox.style.display = 'none';
+    }
+
     updateCalcDisplay();
-    renderHistory();
+    document.getElementById('calc-modal').style.display = 'block';
 }
 
 function pressKey(num) {
     if (num === '.' && currentDisplay.includes('.')) return;
+    if (currentDisplay.length > 12) return;
     currentDisplay += num;
     updateCalcDisplay();
 }
@@ -210,42 +226,45 @@ function clearCalc() {
 }
 
 function updateCalcDisplay() {
-    document.getElementById('calc-display').innerText = currentDisplay || "0";
+    const displayElement = document.getElementById('calc-display');
+    if (displayElement) {
+        displayElement.innerText = currentDisplay || "0";
+    }
 }
 
 function addToHistory() {
-    if (currentDisplay === "" || currentDisplay === ".") return;
+    if (currentDisplay === "" || parseFloat(currentDisplay) === 0) return;
+    const valorIngresado = parseFloat(currentDisplay);
+    let resultado = currentProduct.isWeight ? (valorIngresado / currentProduct.unitWeight) : valorIngresado;
     
-    let val = parseFloat(currentDisplay);
-    if (currentProduct.isWeight) {
-        val = Math.round((val / currentProduct.unitWeight) * 100) / 100;
-    }
-    
-    currentProduct.history.push(val);
-    currentProduct.qty = Math.round(currentProduct.history.reduce((a, b) => a + b, 0) * 100) / 100;
-    
-    currentDisplay = "";
-    updateCalcDisplay();
-    renderHistory();
+    currentProduct.qty += resultado;
+    currentProduct.qty = Math.round(currentProduct.qty * 100) / 100;
+    const registro = currentProduct.isWeight ? `${valorIngresado}kg` : valorIngresado.toString();
+    currentProduct.history.push(registro);
+    finalizeAction();
 }
 
 function saveCalc() {
-    if (currentDisplay !== "" && currentDisplay !== ".") addToHistory();
-    document.getElementById('calc-modal').style.display = "none";
-    document.getElementById('search').value = "";
-    filterProducts();
+    if (currentDisplay === "") return;
+    const valorEnPantalla = parseFloat(currentDisplay);
+    let resultado = currentProduct.isWeight ? (valorEnPantalla / currentProduct.unitWeight) : valorEnPantalla;
+    
+    currentProduct.qty = Math.round(resultado * 100) / 100;
+    const registro = currentProduct.isWeight ? `${valorEnPantalla}kg` : valorEnPantalla.toString();
+    currentProduct.history = [registro];
+    finalizeAction();
+}
+
+function finalizeAction() {
     renderSelectedList();
+    closeCalc();
+    document.getElementById('search').value = "";
+    document.getElementById('results').innerHTML = `<div style="text-align:center; padding:20px; color:#888;">Busca un producto</div>`;
 }
 
 function closeCalc() {
     document.getElementById('calc-modal').style.display = "none";
-}
-
-function renderHistory() {
-    const historyDiv = document.getElementById('calc-history');
-    historyDiv.innerText = currentProduct.history.length > 0 
-        ? `${currentProduct.history.join(" + ")} = ${currentProduct.qty}`
-        : "Sin registros";
+    currentDisplay = "";
 }
 
 // 7. GESTIÓN DE LISTA
@@ -265,12 +284,10 @@ function renderSelectedList() {
         card.innerHTML = `
             <div style="flex-grow: 1;" onclick="openCalcById('${prod.name.replace(/'/g, "\\'")}')">
                 <span style="font-weight:600; display:block;">${prod.name}</span>
-                <small style="color: #2980b9;">Suma: ${prod.history.join(" + ")}</small>
+                <small style="color: #2980b9;">Desglose: ${prod.history.join(" + ")}</small>
             </div>
             <div style="text-align: right; display: flex; align-items: center; gap: 15px;">
-                <div>
-                    <div style="font-size: 1.2rem; font-weight: bold;">${prod.qty}</div>
-                </div>
+                <div style="font-size: 1.2rem; font-weight: bold;">${prod.qty}</div>
                 <button class="delete-item-btn" onclick="removeProduct('${prod.name.replace(/'/g, "\\'")}')">🗑️</button>
             </div>
         `;
@@ -294,52 +311,10 @@ function removeProduct(name) {
     }
 }
 
-function addNewProductPrompt() {
-    const name = prompt("Nombre del nuevo producto:");
-    if (name && name.trim() !== "") {
-        const upper = name.toUpperCase();
-        if(inventoryData.find(p => p.name.toUpperCase() === upper)) return alert("El producto ya existe");
-        
-        const newProd = { name: upper, qty: 0, history: [], unitWeight: 1, isWeight: false };
-        inventoryData.push(newProd);
-        openCalc(newProd);
-    }
-}
-
-// 8. EXPORTACIÓN Y PERSISTENCIA
-function exportToExcel() {
-    const items = inventoryData.filter(p => p.qty > 0);
-    if(items.length === 0) return alert("No hay nada que exportar.");
-
-    // GUARDAR EN HISTORIAL AUTOMÁTICAMENTE
-    saveToLocalStorage();
-
-    const data = items.map(p => ({
-        "PRODUCTO": p.name,
-        "CANTIDAD": p.qty,
-        "DESGLOSE": p.history.join(" + ")
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-    XLSX.writeFile(wb, `Inventario_${new Date().getTime()}.xlsx`);
-    
-    alert("Excel generado y guardado en Historial.");
-}
-
-function resetCurrentInventory() {
-    if(confirm("¿Seguro que quieres borrar el conteo actual?")) {
-        location.reload();
-    }
-}
-
-// --- SISTEMA DE HISTORIAL CON VISUALIZACIÓN ---
-
+// 8. PERSISTENCIA Y HISTORIAL
 function saveToLocalStorage() {
     const resp = document.getElementById('responsables').value.trim() || "Sin nombre";
     const countedItems = inventoryData.filter(p => p.qty > 0);
-    
     if (countedItems.length === 0) return;
 
     const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
@@ -353,124 +328,141 @@ function saveToLocalStorage() {
             history: [...p.history]
         }))
     };
-
     history.push(newEntry);
     localStorage.setItem('inventoryHistory', JSON.stringify(history));
 }
 
 function openHistoryModal() {
-    const modal = document.getElementById('history-modal');
     const listContainer = document.getElementById('history-list');
     const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
-
     listContainer.innerHTML = "";
-
     if (history.length === 0) {
-        listContainer.innerHTML = "<p style='text-align:center; color:#888;'>No hay registros guardados.</p>";
+        listContainer.innerHTML = "<p style='text-align:center; color:#888;'>No hay registros.</p>";
     } else {
         [...history].reverse().forEach(inv => {
             const div = document.createElement('div');
-            div.style = "display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border:1px solid #ddd; padding:10px; border-radius:8px; cursor:pointer; background:#fff;";
-            
+            div.style = "display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border:1px solid #ddd; padding:10px; border-radius:8px; background:#fff;";
             div.innerHTML = `
-                <div onclick="loadInventory(${inv.id})" style="flex-grow:1">
+                <div onclick="loadInventory(${inv.id})" style="flex-grow:1; cursor:pointer;">
                     <strong style="display:block">${inv.date}</strong>
-                    <small>${inv.staff} (${inv.data.length} productos)</small>
+                    <small>${inv.staff} (${inv.data.length} ítems)</small>
                 </div>
-                <button onclick="deleteFromHistory(${inv.id})" style="background:none; border:none; color:red; font-size:1.2rem; margin-left:10px; cursor:pointer;">🗑️</button>
+                <button onclick="deleteFromHistory(${inv.id})" style="background:none; border:none; color:red; font-size:1.2rem;">🗑️</button>
             `;
             listContainer.appendChild(div);
         });
     }
-    modal.style.display = "block";
+    document.getElementById('history-modal').style.display = "block";
 }
 
 function loadInventory(id) {
     const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
     const selected = history.find(inv => inv.id === id);
-    
-    if (!selected) return;
+    if (!selected || !confirm(`¿Cargar inventario de "${selected.staff}"?`)) return;
 
-    if (confirm(`¿Deseas cargar el inventario de "${selected.staff}"? Se perderá el conteo actual de la pantalla.`)) {
-        // Resetear base
-        inventoryData.forEach(p => { p.qty = 0; p.history = []; });
-
-        // Cargar datos
-        selected.data.forEach(savedItem => {
-            let prod = inventoryData.find(p => p.name === savedItem.name);
-            if (!prod) {
-                prod = { name: savedItem.name, qty: 0, history: [], unitWeight: 1, isWeight: false };
-                inventoryData.push(prod);
-            }
-            prod.qty = savedItem.qty;
-            prod.history = [...savedItem.history];
-        });
-
-        document.getElementById('display-responsables').innerText = "Viendo Historial: " + selected.staff;
-        document.getElementById('setup').classList.remove('active');
-        document.getElementById('inventory').classList.add('active');
-        
-        closeHistoryModal();
-        renderSelectedList();
-        alert("Inventario cargado correctamente.");
-    }
+    inventoryData.forEach(p => { p.qty = 0; p.history = []; });
+    selected.data.forEach(savedItem => {
+        let prod = inventoryData.find(p => p.name === savedItem.name);
+        if (!prod) {
+            prod = { name: savedItem.name, qty: 0, history: [], unitWeight: 1, isWeight: false };
+            inventoryData.push(prod);
+        }
+        prod.qty = savedItem.qty;
+        prod.history = [...savedItem.history];
+    });
+    document.getElementById('display-responsables').innerText = "Viendo: " + selected.staff;
+    document.getElementById('setup').classList.remove('active');
+    document.getElementById('inventory').classList.add('active');
+    closeHistoryModal();
+    renderSelectedList();
 }
 
 function deleteFromHistory(id) {
-    if (confirm("¿Borrar definitivamente este registro?")) {
-        let history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
-        history = history.filter(inv => inv.id !== id);
-        localStorage.setItem('inventoryHistory', JSON.stringify(history));
-        openHistoryModal();
-    }
+    if (!confirm("¿Borrar registro?")) return;
+    let history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
+    history = history.filter(inv => inv.id !== id);
+    localStorage.setItem('inventoryHistory', JSON.stringify(history));
+    openHistoryModal();
 }
 
 function closeHistoryModal() {
     document.getElementById('history-modal').style.display = "none";
 }
 
-// INICIAR AL CARGAR EL SCRIPT
-initInventory();
-
-// --- FUNCIONES DE RESPALDO Y DESCARGA TOTAL ---
-
-// 1. Descargar TODO el historial en un archivo .json (Respaldo)
-function descargarRespaldoCompleto() {
-    const history = localStorage.getItem('inventoryHistory');
-    if (!history || history === "[]") return alert("No hay historial para descargar.");
-
-    const blob = new Blob([history], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+// 9. FUNCIONES DE BOTONES ADICIONALES
+function addNewProductPrompt() {
+    const name = prompt("Nombre del nuevo producto (Ej: PRUEBA 200 GRS):");
     
-    a.href = url;
-    a.download = `Respaldo_Inventarios_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// 2. Exportar todos los inventarios del historial a un solo Excel (Reporte Maestro)
-function exportarTodoAExcel() {
-    const history = JSON.parse(localStorage.getItem('inventoryHistory') || "[]");
-    if (history.length === 0) return alert("El historial está vacío.");
-
-    const wb = XLSX.utils.book_new();
-
-    history.forEach((inv, index) => {
-        const wsData = inv.data.map(p => ({
-            "PRODUCTO": p.name,
-            "CANTIDAD": p.qty,
-            "DESGLOSE": p.history.join(" + ")
-        }));
+    if (name && name.trim() !== "") {
+        const upper = name.toUpperCase();
         
-        const ws = XLSX.utils.json_to_sheet(wsData);
-        // Creamos una pestaña para cada fecha (limitado a 31 caracteres por Excel)
-        const sheetName = `Inv ${inv.date.split(',')[0].replace(/\//g, '-')}_${index}`;
-        XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 30));
-    });
+        // 1. Verificamos si ya existe
+        let existing = inventoryData.find(p => p.name.toUpperCase() === upper);
+        if (existing) {
+            return openCalc(existing);
+        }
 
-    XLSX.writeFile(wb, "Reporte_Historico_Completo.xlsx");
+        // 2. LÓGICA DE DETECCIÓN DE PESO AUTOMÁTICA
+        let uWeight = 1;
+        let isWeight = false;
+
+        if (upper.includes("GRS") || upper.includes("GMS") || upper.includes("GR")) {
+            if (upper.includes("900")) uWeight = 0.9;
+            else if (upper.includes("500")) uWeight = 0.5;
+            else if (upper.includes("450")) uWeight = 0.45;
+            else if (upper.includes("400")) uWeight = 0.4;
+            else if (upper.includes("375")) uWeight = 0.375;
+            else if (upper.includes("300")) uWeight = 0.3;
+            else if (upper.includes("250")) uWeight = 0.25;
+            else if (upper.includes("200")) uWeight = 0.2;
+            else if (upper.includes("100")) uWeight = 0.1;
+            else if (upper.includes("1 KG") || upper.includes("1KG")) uWeight = 1.0;
+            
+            // Si el peso cambió de 1, es un producto pesado
+            if (uWeight !== 1) isWeight = true;
+        }
+
+        // 3. Creamos el nuevo producto con la configuración detectada
+        const newProd = { 
+            name: upper, 
+            qty: 0, 
+            history: [], 
+            unitWeight: uWeight, 
+            isWeight: isWeight 
+        };
+
+        inventoryData.push(newProd);
+        
+        // Mensaje de confirmación para el usuario
+        if (isWeight) {
+            console.log(`Detectado: ${upper} como producto de ${uWeight * 1000}g`);
+        }
+
+        openCalc(newProd);
+    }
 }
+
+function resetInventory() {
+    if (confirm("¿Estás seguro de reiniciar? Se perderá el conteo actual (no el historial).")) {
+        inventoryData.forEach(p => { p.qty = 0; p.history = []; });
+        renderSelectedList();
+        document.getElementById('inventory').classList.remove('active');
+        document.getElementById('setup').classList.add('active');
+    }
+}
+
+function exportToExcel() {
+    const items = inventoryData.filter(p => p.qty > 0);
+    if(items.length === 0) return alert("No hay nada que exportar.");
+    saveToLocalStorage();
+    const data = items.map(p => ({ "PRODUCTO": p.name, "CANTIDAD": p.qty, "DESGLOSE": p.history.join(" + ") }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+    XLSX.writeFile(wb, `Inventario_${new Date().getTime()}.xlsx`);
+    alert("Excel generado.");
+}
+
+// INICIO
+initInventory();
 
