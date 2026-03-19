@@ -125,7 +125,7 @@ function initInventory() {
         const upper = name.toUpperCase();
         
         // Detección mejorada de peso
-        if (upper.includes("GRS") || upper.includes("GR")) {
+        if (upper.includes("GRS") || upper.includes("GMS") || upper.includes("GR")) {
             if (upper.includes("900")) uWeight = 0.9;
             else if (upper.includes("500")) uWeight = 0.5;
             else if (upper.includes("450")) uWeight = 0.45;
@@ -282,14 +282,14 @@ function renderSelectedList() {
         const card = document.createElement('div');
         card.className = 'product-card selected-item';
         card.innerHTML = `
-            <div style="flex-grow: 1;" onclick="openCalcById('${prod.name.replace(/'/g, "\\'")}')">
-                <span style="font-weight:600; display:block;">${prod.name}</span>
-                <small style="color: #2980b9;">Desglose: ${prod.history.join(" + ")}</small>
-            </div>
-            <div style="text-align: right; display: flex; align-items: center; gap: 15px;">
-                <div style="font-size: 1.2rem; font-weight: bold;">${prod.qty}</div>
-                <button class="delete-item-btn" onclick="removeProduct('${prod.name.replace(/'/g, "\\'")}')">🗑️</button>
-            </div>
+        <div class="product-info" onclick="openCalcById('${prod.name.replace(/'/g, "\\'")}')">
+            <span style="font-weight:600; display:block;">${prod.name}</span>
+            <small>Desglose: ${prod.history.join(" + ")}</small>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="qty-box">${prod.qty}</div>
+            <button class="delete-item-btn" onclick="removeProduct('${prod.name.replace(/'/g, "\\'")}')" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🗑️</button>
+        </div>
         `;
         container.appendChild(card);
     });
@@ -396,13 +396,11 @@ function addNewProductPrompt() {
     if (name && name.trim() !== "") {
         const upper = name.toUpperCase();
         
-        // 1. Verificamos si ya existe
         let existing = inventoryData.find(p => p.name.toUpperCase() === upper);
         if (existing) {
             return openCalc(existing);
         }
 
-        // 2. LÓGICA DE DETECCIÓN DE PESO AUTOMÁTICA
         let uWeight = 1;
         let isWeight = false;
 
@@ -418,11 +416,9 @@ function addNewProductPrompt() {
             else if (upper.includes("100")) uWeight = 0.1;
             else if (upper.includes("1 KG") || upper.includes("1KG")) uWeight = 1.0;
             
-            // Si el peso cambió de 1, es un producto pesado
             if (uWeight !== 1) isWeight = true;
         }
 
-        // 3. Creamos el nuevo producto con la configuración detectada
         const newProd = { 
             name: upper, 
             qty: 0, 
@@ -432,12 +428,6 @@ function addNewProductPrompt() {
         };
 
         inventoryData.push(newProd);
-        
-        // Mensaje de confirmación para el usuario
-        if (isWeight) {
-            console.log(`Detectado: ${upper} como producto de ${uWeight * 1000}g`);
-        }
-
         openCalc(newProd);
     }
 }
@@ -451,16 +441,58 @@ function resetInventory() {
     }
 }
 
+/**
+ * EXPORTACIÓN A EXCEL CON FORMATO DE PLANILLA
+ */
 function exportToExcel() {
     const items = inventoryData.filter(p => p.qty > 0);
-    if(items.length === 0) return alert("No hay nada que exportar.");
+    if (items.length === 0) return alert("No hay datos para exportar.");
+
     saveToLocalStorage();
-    const data = items.map(p => ({ "PRODUCTO": p.name, "CANTIDAD": p.qty, "DESGLOSE": p.history.join(" + ") }));
-    const ws = XLSX.utils.json_to_sheet(data);
+
+    // 1. Obtener datos de encabezado
+    const responsables = document.getElementById('responsables').value.trim() || "No especificado";
+    const fechaActual = new Date().toLocaleDateString();
+
+    // 2. Crear una matriz de datos (Array of Arrays) para el encabezado y la tabla
+    const spreadsheetData = [
+        ["INVENTARIO DE REGUERA", "", "Fecha:", fechaActual],
+        ["Responsables:", responsables, "", ""],
+        [""], 
+        ["PRODUCTO", "DESGLOSE", "CANTIDAD"] 
+    ];
+
+    // 3. Añadir los productos
+    items.forEach(p => {
+        spreadsheetData.push([
+            p.name,
+            p.history.join(" + "),
+            p.qty
+        ]);
+    });
+
+    // 4. Crear el libro y la hoja
+    const ws = XLSX.utils.aoa_to_sheet(spreadsheetData);
     const wb = XLSX.utils.book_new();
+
+    // 5. Configurar anchos de columna
+    ws['!cols'] = [
+        { wch: 45 }, // PRODUCTO
+        { wch: 25 }, // DESGLOSE
+        { wch: 15 }  // CANTIDAD
+    ];
+
+    // 6. Combinar celdas para el título (Opcional)
+    if(!ws['!merges']) ws['!merges'] = [];
+    ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }); 
+
     XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-    XLSX.writeFile(wb, `Inventario_${new Date().getTime()}.xlsx`);
-    alert("Excel generado.");
+
+    // Descargar con nombre limpio
+    const nombreArchivo = `Inventario_${fechaActual.replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(wb, nombreArchivo);
+
+    alert("✅ Excel exportado correctamente.");
 }
 
 // INICIO
