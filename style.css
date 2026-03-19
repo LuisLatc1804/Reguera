@@ -131,13 +131,41 @@ input[type="text"]:focus {
 }
 
 .product-card {
+    font-size: 0.9rem; /* Letra un poco más pequeña */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 12px;
     border-bottom: 1px solid #eee;
-    padding: 15px 10px;
-    background: #fff;
-    transition: background 0.2s;
+}
+
+/* Estilo para el recuadro de la cantidad */
+.qty-box {
+    background-color: #f8f9fa;
+    border: 2px solid var(--secondary); /* Color verde del sistema */
+    color: var(--primary);
+    border-radius: 8px;
+    min-width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-left: 10px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Ajuste para que el nombre no choque con el recuadro */
+.product-info {
+    flex: 1;
+    padding-right: 10px;
+    line-height: 1.2;
+}
+
+.product-info small {
+    font-size: 0.75rem; /* El desglose aún más pequeño */
+    color: #7f8c8d;
 }
 
 .product-card:active { background: #f9f9f9; }
@@ -278,6 +306,9 @@ input[type="text"]:focus {
     font-size: 0.8rem;
     margin-right: 5px;
 }
+
+.modal-footer .btn-cancel { flex: 1; }
+.modal-footer .btn-save { flex: 2; }
 
 .modal-footer .btn-cancel { flex: 1; }
 .modal-footer .btn-save { flex: 2; }
