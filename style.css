@@ -12,7 +12,7 @@
     --dark-bg: #2f3542;
     --success-text: #2ecc71;
     --purple: #9b59b6;
-    --white: #ffffff; /* Nueva variable */
+    --white: #ffffff;
 }
 
 body {
@@ -28,13 +28,13 @@ body {
     max-width: 500px;
     margin: auto;
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-h1 { text-align: center; color: var(--primary); margin-bottom: 20px; }
-h3 { color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; margin-top: 20px; }
+h1 { text-align: center; color: var(--primary); margin-bottom: 15px; font-size: 1.5rem; }
+h3 { color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; margin-top: 10px; font-size: 1.1rem; }
 
 /* =========================================
    2. SECCIONES Y FORMULARIOS
@@ -68,115 +68,105 @@ input[type="text"]:focus {
     font-weight: bold;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: transform 0.1s, background 0.3s;
+    transition: transform 0.1s;
     margin-bottom: 10px;
 }
 
 .btn:active { transform: scale(0.98); }
 
 /* =========================================
-   3. BARRA DE NAVEGACIÓN (CAMBIADA A BLANCA)
+   3. BARRA DE NAVEGACIÓN (BLANCA Y PEGAJOSA)
    ========================================= */
 .top-nav {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    background: var(--white); /* Fondo Blanco */
-    padding: 12px;
+    gap: 8px;
+    background: var(--white);
+    padding: 10px;
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra para resaltar sobre el fondo */
-    border: 1px solid #eee; /* Borde sutil */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
 }
 
 .nav-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #f8f9fa; /* Gris muy clarito para los botones */
+    background: #f8f9fa;
     border: 1px solid #eee;
-    color: var(--primary); /* Texto oscuro para que se lea */
-    padding: 8px 5px;
+    color: var(--primary);
+    padding: 6px 2px;
     border-radius: 8px;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
 }
 
-.nav-btn:active { background: #e9ecef; }
+.nav-btn span { font-size: 1.1rem; margin-bottom: 2px; }
 
-.nav-btn span { font-size: 1.2rem; margin-bottom: 4px; }
-
-/* Colores de las barritas inferiores de los botones para diferenciarlos */
 .btn-new { border-bottom: 3px solid var(--danger) !important; }
 .btn-add { border-bottom: 3px solid var(--warning) !important; }
 .btn-history { border-bottom: 3px solid var(--accent) !important; }
 
 /* =========================================
-   4. BUSCADOR Y LISTAS
+   4. LISTA DE PRODUCTOS (ULTRA COMPACTA)
    ========================================= */
-.resp-banner {
-    background: #e1f5fe;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-weight: bold;
-    color: var(--primary);
-    text-align: center;
-    border: 1px solid #b3e5fc;
-}
-
 .product-card {
-    font-size: 0.9rem; /* Letra un poco más pequeña */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 8px 5px;
+    background: #fff;
 }
 
-/* Estilo para el recuadro de la cantidad */
-.qty-box {
-    background-color: #f8f9fa;
-    border: 2px solid var(--secondary); /* Color verde del sistema */
-    color: var(--primary);
-    border-radius: 8px;
-    min-width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin-left: 10px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* Ajuste para que el nombre no choque con el recuadro */
 .product-info {
     flex: 1;
-    padding-right: 10px;
-    line-height: 1.2;
+    padding-right: 5px;
+    line-height: 1.1;
+}
+
+/* Letra pequeña para los nombres */
+.product-info strong {
+    display: block;
+    color: var(--primary);
+    font-size: 0.75rem; 
+    text-transform: uppercase;
 }
 
 .product-info small {
-    font-size: 0.75rem; /* El desglose aún más pequeño */
-    color: #7f8c8d;
+    font-size: 0.65rem;
+    color: #95a5a6;
 }
 
-.product-card:active { background: #f9f9f9; }
+/* Recuadro de cantidad solicitado */
+.qty-box {
+    background-color: #f8f9fa;
+    border: 1.5px solid var(--secondary);
+    color: var(--primary);
+    border-radius: 6px;
+    min-width: 40px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-left: 8px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
 
 .delete-item-btn {
-    background: #fff5f5;
-    border: 1px solid #feb2b2;
+    background: none;
+    border: none;
     color: var(--danger);
-    padding: 8px 12px;
-    border-radius: 8px;
+    font-size: 1.1rem;
     cursor: pointer;
+    padding: 0 8px;
 }
 
 /* =========================================
@@ -196,13 +186,22 @@ input[type="text"]:focus {
     background: white;
     margin: 5% auto; 
     padding: 15px;
-    width: 92%;
+    width: 90%;
     max-width: 380px;
-    max-height: 90vh; 
-    overflow-y: auto; 
     border-radius: 20px;
-    position: relative;
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.calc-display {
+    background: var(--dark-bg);
+    color: var(--success-text);
+    padding: 12px;
+    text-align: right;
+    font-size: 1.8rem; 
+    font-weight: bold;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
 }
 
 .calculator-grid {
@@ -212,33 +211,19 @@ input[type="text"]:focus {
 }
 
 .calculator-grid button {
-    padding: 12px; 
+    padding: 15px; 
     font-size: 1.3rem; 
     border-radius: 12px;
     border: 1px solid #eee;
     background: #f8f9fa;
     color: var(--primary);
     font-weight: bold;
-    cursor: pointer;
-    transition: background 0.1s;
-}
-
-.calc-display {
-    background: var(--dark-bg);
-    color: var(--success-text);
-    padding: 10px 15px;
-    text-align: right;
-    font-size: 1.8rem; 
-    font-weight: bold;
-    border-radius: 12px;
-    margin-bottom: 8px;
-    font-family: 'Courier New', monospace;
 }
 
 .btn-add-sum {
     width: 100%;
     margin-top: 10px;
-    padding: 12px;
+    padding: 15px;
     background: var(--accent);
     color: white;
     border: none;
@@ -247,68 +232,43 @@ input[type="text"]:focus {
     font-weight: bold;
 }
 
-#weight-calc-info {
-    background: #fff3e0;
-    color: var(--weight-color);
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    font-size: 0.85rem;
-    text-align: center;
-    border: 1px solid #ffe0b2;
-    font-weight: bold;
-}
-
-#history-list {
-    max-height: 350px;
-    overflow-y: auto;
-    margin-top: 10px;
-    padding-right: 5px;
-}
-
-.btn-cancel {
-    background-color: #bdc3c7;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.btn-save {
-    background-color: var(--secondary);
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#history-list::-webkit-scrollbar { width: 6px; }
-#history-list::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 10px;
-}
-
 .modal-footer {
     display: flex;
     gap: 10px;
     margin-top: 15px;
 }
 
-.badge-weight {
-    background-color: var(--weight-color); /* El naranja que definimos */
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
+.btn-save { background: var(--secondary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; flex: 2; }
+.btn-cancel { background: #bdc3c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; flex: 1; }
+
+#weight-calc-info {
+    background: #fff3e0;
+    color: var(--weight-color);
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 10px;
     font-size: 0.8rem;
-    margin-right: 5px;
+    text-align: center;
+    border: 1px solid #ffe0b2;
 }
 
-.modal-footer .btn-cancel { flex: 1; }
-.modal-footer .btn-save { flex: 2; }
+/* =========================================
+   6. EXPORTAR Y BOTONES FINALES
+   ========================================= */
+.footer-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-.modal-footer .btn-cancel { flex: 1; }
-.modal-footer .btn-save { flex: 2; }
+.btn-export {
+    background: var(--secondary);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+}
