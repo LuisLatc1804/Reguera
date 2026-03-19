@@ -271,25 +271,26 @@ function closeCalc() {
 function renderSelectedList() {
     const container = document.getElementById('selected-list');
     container.innerHTML = '';
-    const selectedItems = inventoryData.filter(p => p.qty > 0);
+    
+    const itemsContados = inventoryData.filter(p => p.qty > 0);
 
-    if (selectedItems.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#888; padding:10px;">No hay productos contados</p>';
+    if (itemsContados.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#999; font-size:0.8rem;">No hay productos en el conteo</p>';
         return;
     }
 
-    selectedItems.forEach(prod => {
+    itemsContados.forEach(prod => {
         const card = document.createElement('div');
-        card.className = 'product-card selected-item';
+        card.className = 'product-card';
         card.innerHTML = `
-        <div class="product-info" onclick="openCalcById('${prod.name.replace(/'/g, "\\'")}')">
-            <span style="font-weight:600; display:block;">${prod.name}</span>
-            <small>Desglose: ${prod.history.join(" + ")}</small>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="qty-box">${prod.qty}</div>
-            <button class="delete-item-btn" onclick="removeProduct('${prod.name.replace(/'/g, "\\'")}')" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🗑️</button>
-        </div>
+            <div class="product-info" onclick="openCalcById('${prod.name.replace(/'/g, "\\'")}')">
+                <strong>${prod.name}</strong>
+                <small>Sumas: ${prod.history.join(" + ")}</small>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div class="qty-box">${prod.qty}</div>
+                <button class="delete-item-btn" onclick="removeProduct('${prod.name.replace(/'/g, "\\'")}')">🗑️</button>
+            </div>
         `;
         container.appendChild(card);
     });
